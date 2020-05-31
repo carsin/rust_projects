@@ -1,3 +1,5 @@
+# 1. Variables & DataTypes
+
 ## Variables and Mutability
 
 Variables are denoted by the syntax
