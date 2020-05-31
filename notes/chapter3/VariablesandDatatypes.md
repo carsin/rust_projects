@@ -1,4 +1,4 @@
-# 1. Variables & DataTypes
+# 3.1 Variables & Data Types
 
 ## Variables and Mutability
 
