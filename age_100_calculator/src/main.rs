@@ -6,11 +6,11 @@ use chrono::prelude::*;
 
 fn main() {
     let name = input(("What is your name? ").to_string());
-    let age = input(format!("How old are you, {}? ", &name))
+    let age = input(format!("How old are you, {}? ", name))
         .parse().expect("Failed converting age to number");
 
     let centennial_year = calculate_year_of_centennial(age);
-    println!("{}, you will turn 100 during the year {}!", &name, &centennial_year);
+    println!("{}, you will turn 100 during the year {}!", name, centennial_year);
 }
 
 fn input(user_message: String) -> String {
@@ -31,8 +31,5 @@ fn input(user_message: String) -> String {
 fn calculate_year_of_centennial(age: i32) -> i32 {
     // Get current year
     let current_year = Utc::today().year();
-    // Calculate years left until age 100
-    let years = 100 - age;
-
-    &current_year + &years
+    current_year - age + 99
 }
