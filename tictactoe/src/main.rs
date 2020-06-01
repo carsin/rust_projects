@@ -10,13 +10,12 @@ fn main() {
     loop {
         print_board(&board);
         turn_as_int = turn as u8 + 1;
-
         match turn {
             false => turn_as_char = "X",
             true => turn_as_char = "Y",
         };
-        println!("{}'s turn.", turn_as_char);
 
+        println!("{}'s turn.", turn_as_char);
         let play_position = get_player_input();
 
         if board[play_position[0]][play_position[1]] == 0 {
@@ -26,8 +25,7 @@ fn main() {
                 println!("{} wins!", turn_as_char);
                 break;
             }
-
-            // turn = !turn;
+            turn = !turn;
         } else {
             println!("That space is already occupied!");
         }
