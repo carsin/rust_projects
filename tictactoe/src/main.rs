@@ -15,14 +15,16 @@ fn main() {
             true => turn_as_char = "Y",
         };
 
-        println!("{}'s turn.", turn_as_char);
+        println!("\n{}'s turn.", turn_as_char);
         let play_position = get_player_input();
 
         if board[play_position[0]][play_position[1]] == 0 {
             board[play_position[0]][play_position[1]] = turn_as_int;
             if check_for_win(&board, &play_position, turn_as_int) {
+                println!("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
                 print_board(&board);
                 println!("{} wins!", turn_as_char);
+                io::stdin().read_line(&mut String::new()).unwrap();
                 break;
             }
             turn = !turn;
@@ -71,7 +73,7 @@ fn check_for_win(board: &[[u8; 3]; 3], last_move: &[usize; 2], turn_as_int: u8) 
 }
 
 fn print_board(board: &[[u8; 3]; 3]) {
-    print!("    1   2   3  \n");
+    print!("\n    1   2   3  \n");
     print!("  ┌───┬───┬───┐\n");
     for y in 0..3 {
         print!("{} │ ", y + 1);
