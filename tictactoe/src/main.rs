@@ -2,22 +2,33 @@ use std::io;
 use std::io::Write;
 
 fn main() {
-    let board = [[0; 3]; 3];
+    let mut board = [[0; 3]; 3];
     let mut turn = false;
-
     let playing = true;
+
     while playing {
         print_board(&board);
-        get_player_input(&turn);
+        match turn {
+            false => println!("It is X's turn"),
+            true => println!("It is O's turn"),
+        };
 
-        turn = !turn;
+        let play_position = get_player_input();
+
+        if board[play_position[0]][play_position[1]] == 0{
+            board[play_position[0]][play_position[1]] = turn as u8 + 1;
+            turn = !turn;
+        } else {
+            println!("That space is already occupied!");
+        }
     }
 }
 
 fn print_board(board: &[[u8; 3]; 3]) {
-    print!("┌───┬───┬───┐\n");
+    print!("    1   2   3  \n");
+    print!("  ┌───┬───┬───┐\n");
     for x in 0..3 {
-        print!("│ ");
+        print!("{} │ ", x + 1);
         for y in 0..3 {
             match board[x][y] {
                 0 => print!("."),
@@ -29,21 +40,22 @@ fn print_board(board: &[[u8; 3]; 3]) {
         }
         print!("\n");
     }
-    print!("└───┴───┴───┘\n");
+    print!("  └───┴───┴───┘\n");
 
     io::stdout().flush().unwrap();
 }
 
-fn get_player_input(turn: &bool) -> [u8; 2] {
+fn get_player_input() -> [usize; 2] {
     let mut x_input = String::new();
-    let mut x: u8 = 0;
+    let mut x: usize = 0;
+
     while x_input == String::new() {
-        print!("Turn: {}, Choose x position: ", &turn);
+        print!("X: ");
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut x_input).expect("Failed");
 
-        if x_input.trim().parse::<u8>().is_ok() {
-            x = x_input.trim().parse::<u8>().unwrap();
+        if x_input.trim().parse::<usize>().is_ok() {
+            x = x_input.trim().parse::<usize>().unwrap();
             if x > 3 {
                 println!("Must input a number lower than 3");
                 x_input = String::new();
@@ -57,15 +69,14 @@ fn get_player_input(turn: &bool) -> [u8; 2] {
     }
 
     let mut y_input = String::new();
-    let mut y: u8 = 0;
-
+    let mut y: usize = 0;
     while y_input == String::new() {
-        print!("Turn: {}, Choose y position: ", &turn);
+        print!("Y: ");
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut y_input).expect("Failed");
 
-        if y_input.trim().parse::<u8>().is_ok() {
-            y = y_input.trim().parse::<u8>().unwrap();
+        if y_input.trim().parse::<usize>().is_ok() {
+            y = y_input.trim().parse::<usize>().unwrap();
             if y > 3 {
                 println!("Must input a number lower than 3");
                 y_input = String::new();
@@ -77,6 +88,5 @@ fn get_player_input(turn: &bool) -> [u8; 2] {
             y_input = String::new();
         }
     }
-
-    return [x, y];
+    return [x - 1, y - 1];
 }
