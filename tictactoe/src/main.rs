@@ -7,12 +7,6 @@ fn main() {
     let mut turn_as_char;
     let mut turn_as_int;
 
-    // Win check counters
-    let mut vert_play_count = [0; 3];
-    let mut horz_play_count = [0; 3];
-    let mut diag1_play_count = [0; 3];
-    let mut diag2_play_count = [0; 3];
-
     loop {
         print_board(&board);
         turn_as_int = turn as u8 + 1;
@@ -27,28 +21,39 @@ fn main() {
 
         if board[play_position[0]][play_position[1]] == 0 {
             board[play_position[0]][play_position[1]] = turn_as_int;
-
-            // Update win check counters
-            vert_play_count[play_position[0]] += 1;
-            horz_play_count[play_position[1]] += 1;
-            if play_position[0] == play_position[1] { diag1_play_count[play_position[0]] += 1 }
-            if play_position[0] + play_position[1] == 3{ diag2_play_count[play_position[0]] += 1 }
-            // Check for win
-            if vert_play_count[play_position[0]] == 3 || horz_play_count[play_position[1]] == 3 || diag1_play_count[play_position[0]] == 3 || diag2_play_count[play_position[0]] == 3 {
+            if check_for_win(&board, &play_position, turn_as_int) {
                 print_board(&board);
                 println!("{} wins!", turn_as_char);
                 break;
             }
-            turn = !turn;
+
+            // turn = !turn;
         } else {
             println!("That space is already occupied!");
         }
     }
 }
 
-// fn check_for_win(board: &[[u8; 3]; 3], last_move: &[usize; 2], turn_as_int: u8) -> bool {
+fn check_for_win(board: &[[u8; 3]; 3], last_move: &[usize; 2], turn_as_int: u8) -> bool {
+    // Horizontal
+    for x in 0..3 {
+        if board[last_move[0]][x] != turn_as_int { break; }
+        if x == 2 {
+            return true;
+        }
+    }
+    // Vertical
+    for y in 0..3 {
+        if board[y][last_move[1]] != turn_as_int { break; }
+        if y == 2 {
+            return true;
+        }
+    }
 
-// }
+    // Diagonal left to right
+
+    false
+}
 
 fn print_board(board: &[[u8; 3]; 3]) {
     print!("    1   2   3  \n");
