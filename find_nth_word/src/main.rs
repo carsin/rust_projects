@@ -6,13 +6,15 @@ fn main() {
     println!("{}", second_word);
 }
 
+// Finds nth word in a string and returns it as a string
 fn find_nth_word(input_string: &str, n: i32) -> &str {
-    let bytes = input_string.as_bytes();
-    let mut space_count = 0;
+    let bytes = input_string.as_bytes(); // convert string to an array of bytes
+
+    let mut space_count = 0; // count which word we're on by counting spaces
     let mut first_space_index = 0;
 
     for (i, &current_char) in bytes.iter().enumerate() {
-        if current_char == b' ' {
+        if current_char == b' ' { // check if character is a space
             space_count += 1;
 
             if space_count == n - 1 {
@@ -23,5 +25,5 @@ fn find_nth_word(input_string: &str, n: i32) -> &str {
         }
     }
 
-    &input_string
+    &input_string // Return entire string as default
 }
