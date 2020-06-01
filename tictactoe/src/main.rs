@@ -49,8 +49,25 @@ fn check_for_win(board: &[[u8; 3]; 3], last_move: &[usize; 2], turn_as_int: u8) 
             return true;
         }
     }
-
     // Diagonal left to right
+    if last_move[0] == last_move[1] {
+        for i in 0..3 {
+            if board[i][i] != turn_as_int { break; }
+            if i == 2 {
+                return true;
+            }
+        }
+    }
+
+    // Diagonal right to left
+    if last_move[0] + last_move[1] == 2 {
+        for i in 0..3 {
+            if board[i][2 - i] != turn_as_int { break; }
+            if i == 2 {
+                return true;
+            }
+        }
+    }
 
     false
 }
