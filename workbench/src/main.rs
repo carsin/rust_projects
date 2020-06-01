@@ -1,7 +1,13 @@
+use rand::Rng;
+
 fn main() {
-    print();
+    let num = gen_number();
+
+    println!("{}", num);
 }
 
-fn print() {
-    println!("Hello, world!");
+fn gen_number() -> u32 {
+    let x = rand::thread_rng().gen_range(0, 5);
+
+    x
 }

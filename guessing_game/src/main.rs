@@ -6,7 +6,7 @@ use std::io::Write;
 fn main() {
     println!("Running guess the number game...");
 
-    let secret_number = rand::thread_rng().gen_range(1, 101);
+    let secret_number: u32 = rand::thread_rng().gen_range(1, 101);
 
     loop {
         print!("Input guess: ");
