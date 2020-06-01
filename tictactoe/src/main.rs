@@ -42,12 +42,12 @@ fn get_player_input(turn: &bool) -> u8 {
         io::stdin().read_line(&mut x_input).expect("Failed");
 
         if x_input.trim().parse::<u8>().is_ok() {
-            x_input = x_input.trim().parse::<u8>().unwrap();
-            if x_input > 3 { // Why do I have to convert 3 to a string?
+            let x: u8 = x_input.trim().parse::<u8>().unwrap();
+            if x > 3 { // Why do I have to convert 3 to a string?
                 println!("Must input a number lower than 3");
-                let x_input = String::new();
+                x_input = String::new();
             } else {
-                println!("x: {}", x_input);
+                return x;
             }
         } else {
             println!("Not a number: {}", x_input);
@@ -55,7 +55,5 @@ fn get_player_input(turn: &bool) -> u8 {
         }
     }
 
-    let y_input: u8 = 0;
-
-    x_input
+    0
 }
