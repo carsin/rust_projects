@@ -4,19 +4,41 @@ use std::io::Write;
 fn main() {
     let mut board = [[0; 3]; 3];
     let mut turn = false;
-    let playing = true;
+    let mut turn_as_char;
+    let mut turn_as_int;
 
-    while playing {
+    // Win check counters
+    let mut vert_play_count = [0; 3];
+    let mut horz_play_count = [0; 3];
+    let mut diag1_play_count = [0; 3];
+    let mut diag2_play_count = [0; 3];
+
+    loop {
         print_board(&board);
+        turn_as_int = turn as u8 + 1;
+
         match turn {
-            false => println!("It is X's turn"),
-            true => println!("It is O's turn"),
+            false => turn_as_char = "X",
+            true => turn_as_char = "Y",
         };
+        println!("{}'s turn.", turn_as_char);
 
         let play_position = get_player_input();
 
-        if board[play_position[0]][play_position[1]] == 0{
-            board[play_position[0]][play_position[1]] = turn as u8 + 1;
+        if board[play_position[0]][play_position[1]] == 0 {
+            board[play_position[0]][play_position[1]] = turn_as_int;
+
+            // Update win check counters
+            vert_play_count[play_position[0]] += 1;
+            horz_play_count[play_position[1]] += 1;
+            if play_position[0] == play_position[1] { diag1_play_count[play_position[0]] += 1 }
+            if play_position[0] + play_position[1] == 3{ diag2_play_count[play_position[0]] += 1 }
+            // Check for win
+            if vert_play_count[play_position[0]] == 3 || horz_play_count[play_position[1]] == 3 || diag1_play_count[play_position[0]] == 3 || diag2_play_count[play_position[0]] == 3 {
+                print_board(&board);
+                println!("{} wins!", turn_as_char);
+                break;
+            }
             turn = !turn;
         } else {
             println!("That space is already occupied!");
@@ -24,13 +46,17 @@ fn main() {
     }
 }
 
+// fn check_for_win(board: &[[u8; 3]; 3], last_move: &[usize; 2], turn_as_int: u8) -> bool {
+
+// }
+
 fn print_board(board: &[[u8; 3]; 3]) {
     print!("    1   2   3  \n");
     print!("  ┌───┬───┬───┐\n");
-    for x in 0..3 {
-        print!("{} │ ", x + 1);
-        for y in 0..3 {
-            match board[x][y] {
+    for y in 0..3 {
+        print!("{} │ ", y + 1);
+        for x in 0..3 {
+            match board[y][x] {
                 0 => print!("."),
                 1 => print!("X"),
                 2 => print!("O"),
@@ -59,8 +85,6 @@ fn get_player_input() -> [usize; 2] {
             if x > 3 {
                 println!("Must input a number lower than 3");
                 x_input = String::new();
-            } else {
-                continue;
             }
         } else {
             println!("Not a number: {}", x_input.trim());
@@ -80,13 +104,11 @@ fn get_player_input() -> [usize; 2] {
             if y > 3 {
                 println!("Must input a number lower than 3");
                 y_input = String::new();
-            } else {
-                continue;
             }
         } else {
             println!("Not a number: {}", y_input.trim());
             y_input = String::new();
         }
     }
-    return [x - 1, y - 1];
+    return [y - 1, x - 1];
 }
