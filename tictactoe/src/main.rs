@@ -34,26 +34,49 @@ fn print_board(board: &[[u8; 3]; 3]) {
     io::stdout().flush().unwrap();
 }
 
-fn get_player_input(turn: &bool) -> u8 {
+fn get_player_input(turn: &bool) -> [u8; 2] {
     let mut x_input = String::new();
+    let mut x: u8 = 0;
     while x_input == String::new() {
         print!("Turn: {}, Choose x position: ", &turn);
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut x_input).expect("Failed");
 
         if x_input.trim().parse::<u8>().is_ok() {
-            let x: u8 = x_input.trim().parse::<u8>().unwrap();
-            if x > 3 { // Why do I have to convert 3 to a string?
+            x = x_input.trim().parse::<u8>().unwrap();
+            if x > 3 {
                 println!("Must input a number lower than 3");
                 x_input = String::new();
             } else {
-                return x;
+                continue;
             }
         } else {
-            println!("Not a number: {}", x_input);
+            println!("Not a number: {}", x_input.trim());
             x_input = String::new();
         }
     }
 
-    0
+    let mut y_input = String::new();
+    let mut y: u8 = 0;
+
+    while y_input == String::new() {
+        print!("Turn: {}, Choose y position: ", &turn);
+        io::stdout().flush().unwrap();
+        io::stdin().read_line(&mut y_input).expect("Failed");
+
+        if y_input.trim().parse::<u8>().is_ok() {
+            y = y_input.trim().parse::<u8>().unwrap();
+            if y > 3 {
+                println!("Must input a number lower than 3");
+                y_input = String::new();
+            } else {
+                continue;
+            }
+        } else {
+            println!("Not a number: {}", y_input.trim());
+            y_input = String::new();
+        }
+    }
+
+    return [x, y];
 }
