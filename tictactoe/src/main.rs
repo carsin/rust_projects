@@ -63,7 +63,6 @@ fn check_for_win(board: &[[u8; 3]; 3], last_move: &Coordinate, turn_as_int: u8) 
             }
         }
     }
-
     // Diagonal right to left
     if last_move.y + last_move.x == 2 {
         for i in 0..3 {
