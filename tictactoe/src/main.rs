@@ -1,8 +1,13 @@
 use std::io;
 use std::io::Write;
 
+struct Coordinate {
+    x: usize,
+    y: usize,
+}
+
 fn main() {
-    let mut board = [[0; 3]; 3];
+    let mut board = [[0u8; 3]; 3];
     let mut turn = false;
     let mut turn_as_char;
     let mut turn_as_int;
@@ -16,11 +21,11 @@ fn main() {
         };
 
         println!("\n{}'s turn.", turn_as_char);
-        let play_position = get_player_input();
+        let last_play_coords = get_player_input();
 
-        if board[play_position[0]][play_position[1]] == 0 {
-            board[play_position[0]][play_position[1]] = turn_as_int;
-            if check_for_win(&board, &play_position, turn_as_int) {
+        if board[last_play_coords.y][last_play_coords.x] == 0 {
+            board[last_play_coords.y][last_play_coords.x] = turn_as_int;
+            if check_for_win(&board, &last_play_coords, turn_as_int) {
                 println!("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
                 print_board(&board);
                 println!("{} wins!", turn_as_char);
@@ -34,23 +39,23 @@ fn main() {
     }
 }
 
-fn check_for_win(board: &[[u8; 3]; 3], last_move: &[usize; 2], turn_as_int: u8) -> bool {
+fn check_for_win(board: &[[u8; 3]; 3], last_move: &Coordinate, turn_as_int: u8) -> bool {
     // Horizontal
     for x in 0..3 {
-        if board[last_move[0]][x] != turn_as_int { break; }
+        if board[last_move.y][x] != turn_as_int { break; }
         if x == 2 {
             return true;
         }
     }
     // Vertical
     for y in 0..3 {
-        if board[y][last_move[1]] != turn_as_int { break; }
+        if board[y][last_move.x] != turn_as_int { break; }
         if y == 2 {
             return true;
         }
     }
     // Diagonal left to right
-    if last_move[0] == last_move[1] {
+    if last_move.y == last_move.x {
         for i in 0..3 {
             if board[i][i] != turn_as_int { break; }
             if i == 2 {
@@ -60,7 +65,7 @@ fn check_for_win(board: &[[u8; 3]; 3], last_move: &[usize; 2], turn_as_int: u8) 
     }
 
     // Diagonal right to left
-    if last_move[0] + last_move[1] == 2 {
+    if last_move.y + last_move.x == 2 {
         for i in 0..3 {
             if board[i][2 - i] != turn_as_int { break; }
             if i == 2 {
@@ -93,7 +98,7 @@ fn print_board(board: &[[u8; 3]; 3]) {
     io::stdout().flush().unwrap();
 }
 
-fn get_player_input() -> [usize; 2] {
+fn get_player_input() -> Coordinate {
     let mut x_input = String::new();
     let mut x: usize = 0;
 
@@ -132,5 +137,6 @@ fn get_player_input() -> [usize; 2] {
             y_input = String::new();
         }
     }
-    return [y - 1, x - 1];
+
+    Coordinate { y: y - 1, x: x - 1 }
 }
