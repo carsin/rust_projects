@@ -1,6 +1,8 @@
 use std::io;
 use std::io::Write;
 
+use std::process::exit;
+
 struct Coordinate {
     x: usize,
     y: usize,
@@ -29,9 +31,23 @@ fn main() {
             if check_for_win(&board, &last_play_coords, turn_as_int) {
                 print_board(&board);
                 println!("{} wins!", turn_as_char);
-                board = [[0u8; 3]; 3];
+
+                'ask_loop: loop {
+                    let mut input = String::new();
+                    print!("Play again? Y/N: ");
+                    io::stdout().flush().unwrap();
+                    io::stdin().read_line(&mut input).expect("Failed to read line");
+
+                    let input = input.trim();
+                    if input == "Y" {
+                        board = [[0u8; 3]; 3];
+                        break 'ask_loop;
+                    } else if input == "N" {
+                        exit(0);
+                    }
+                }
             }
-            // turn = !turn;
+            turn = !turn;
         } else {
             println!("That space is already occupied!");
         }
