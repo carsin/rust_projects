@@ -1,7 +1,9 @@
 use std::io;
 use std::io::Write;
-
 use std::process::exit;
+use std::cmp;
+
+
 
 #[derive(PartialEq, Eq, Copy, Clone)] // Allows square to be evaluated with ==
 enum Square {
@@ -62,10 +64,15 @@ fn main() {
             if play_again() { board = [[Square::None; 3]; 3]; }
         }
 
-        if check_for_draw(board) {
+        if check_for_draw(&board) {
             if play_again() { board = [[Square::None; 3]; 3]; }
         }
 
+        turn = match turn {
+            Square::X => Square::O,
+            Square::O => Square::X,
+            _ => panic!("Error!")
+        };
 
         if bot_playing {
             println!("Bots turn!");
@@ -73,9 +80,44 @@ fn main() {
     }
 }
 
-fn minimax(board: &[[Square; 3]; 3], depth: isize) -> isize {
+fn minimax(board: &mut [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize {
+    let score = match check_for_win(&board) {
+        Square::X => 1,
+        Square::O => -1,
+        Square::None => 0,
+    };
 
-    0
+    // Return score if maximizer or minimzer won
+    if score == 1 || score == -1 { return score; }
+    if check_for_draw(&board) { return 0; }
+
+    if maximizer {
+        let mut best = -100;
+
+        for y in 0..3 {
+            for x in 0..3 {
+                if board[y][x] == Square::None {
+                    board[y][x] = Square::O;
+                    best = cmp::max(best, minimax(board, depth + 1, !maximizer));
+                    board[y][x] = Square::None;
+                }
+            }
+        }
+        return best;
+    } else {
+        let mut best = 100;
+
+        for y in 0..3 {
+            for x in 0..3 {
+                if board[y][x] == Square::None {
+                    board[y][x] = Square::X;
+                    best = cmp::max(best, minimax(board, depth + 1, !maximizer));
+                    board[y][x] = Square::None;
+                }
+            }
+        }
+        return best;
+    }
 }
 
 fn check_for_win(board: &[[Square; 3]; 3]) -> Square {
@@ -121,7 +163,7 @@ fn print_board(board: &[[Square; 3]; 3]) {
     io::stdout().flush().unwrap();
 }
 
-fn check_for_draw(board: [[Square; 3]; 3]) -> bool {
+fn check_for_draw(board: &[[Square; 3]; 3]) -> bool {
     for i in 0..3 {
         if board[i].contains(&Square::None) { break; }
         if i == 2 {
