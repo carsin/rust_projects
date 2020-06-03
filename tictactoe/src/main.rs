@@ -29,7 +29,7 @@ fn main() {
         print_board(&board);
         match turn {
             false => turn_as_char = "X",
-            true => turn_as_char = "Y",
+            true => turn_as_char = "O",
         };
 
         turn_as_int = turn as u8 + 1;
@@ -43,26 +43,51 @@ fn main() {
             if check_for_win(&board, &last_play_coords, turn_as_int) {
                 print_board(&board);
                 println!("{} wins!", turn_as_char);
+                if play_again() {
+                    board = [[0u8; 3]; 3];
+                }
+            }
 
-                'ask_loop: loop {
-                    let input = console_input("Play again? Y/N: ");
+            let mut x = 0;
+            for i in 0..3 {
+                if board[i].contains(&0) {
+                    continue;
+                } else {
+                    x += 1;
+                }
 
-                    let input = input.trim();
-                    if input == "Y" {
+                if x == 3 {
+                    println!("DRAW!!!!!!!");
+                    if play_again() {
                         board = [[0u8; 3]; 3];
-                        break 'ask_loop;
-                    } else if input == "N" {
-                        exit(0);
                     }
                 }
             }
-            if bot_playing {
-                println!("bots turn!");
-            } else {
-                turn = !turn;
-            }
+            println!("Rows filled: {}", x);
         } else {
-            println!("That space is already occupied!");
+            println!("\nPosition occupied!");
+            continue;
+        }
+
+        if bot_playing {
+            println!("Bots turn!");
+        } else {
+            turn = !turn;
+        }
+    }
+}
+
+fn play_again() -> bool {
+    loop {
+        let input = console_input("Play again? Y/N: ");
+
+        let input = input.trim();
+        if input == "Y" {
+            return true;
+        } else if input == "N" {
+            exit(0);
+        } else {
+            continue;
         }
     }
 }
