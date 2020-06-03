@@ -14,11 +14,11 @@ fn main() {
     let mut turn_as_char;
     let mut turn_as_int;
 
-    let play_bot_input = console_input("Play against bot? Y/N: ");
+    let play_bot_input = console_input("Play against bot? y/n: ");
     let play_bot_input = play_bot_input.trim();
     let bot_playing: bool = match play_bot_input {
-        "Y" => true,
-        "N" => false,
+        "y" => true,
+        "n" => false,
         _ => {
             println!("Invalid input, defaulting to bot.");
             false
@@ -40,43 +40,58 @@ fn main() {
         // Check if position is empty
         if board[last_play_coords.y][last_play_coords.x] == 0 {
             board[last_play_coords.y][last_play_coords.x] = turn_as_int;
-            if check_for_win(&board, &last_play_coords, turn_as_int) {
+            let win = check_for_win(&board, turn_as_int);
+            if win > 0 {
                 print_board(&board);
                 println!("{} wins!", turn_as_char);
-                if play_again() {
-                    board = [[0u8; 3]; 3];
-                }
+                if play_again() { board = [[0u8; 3]; 3]; }
             }
 
-            for i in 0..3 {
-                if board[i].contains(&0) { break; }
-
-                if i == 2 {
-                    println!("DRAW!!!!!!!");
-                    if play_again() { board = [[0u8; 3]; 3]; }
-                }
+            if check_for_draw(board) {
+                if play_again() { board = [[0u8; 3]; 3]; }
             }
+
         } else {
             println!("\nPosition occupied!");
             continue;
         }
 
+        turn = !turn;
+
         if bot_playing {
             println!("Bots turn!");
-        } else {
-            turn = !turn;
         }
     }
 }
 
+fn minimax(board: &[[u8; 3]; 3], depth: isize) -> isize {
+    let score = check_for_win(&board, 2) as isize;
+    if score == 2 { return score };
+
+    0
+}
+
+fn check_for_draw(board: [[u8; 3]; 3]) -> bool {
+    for i in 0..3 {
+        if board[i].contains(&0) { break; }
+        if i == 2 {
+            return true;
+            println!("DRAW!!!!!!!");
+        }
+    }
+
+    false
+}
+
+
 fn play_again() -> bool {
     loop {
-        let input = console_input("Play again? Y/N: ");
+        let input = console_input("Play again? y/n: ");
 
         let input = input.trim();
         match input {
-            "Y" => return true,
-            "N" => exit(0),
+            "y" => return true,
+            "n" => exit(0),
             _ => continue
         }
     }
@@ -121,41 +136,36 @@ fn get_player_input() -> Coordinate {
     Coordinate { y: y - 1, x: x - 1 }
 }
 
-fn check_for_win(board: &[[u8; 3]; 3], last_move: &Coordinate, turn_as_int: u8) -> bool {
-    // Horizontal
-    for x in 0..3 {
-        if board[last_move.y][x] != turn_as_int { break; }
-        if x == 2 {
-            return true;
-        }
-    }
-    // Vertical
+fn check_for_win(board: &[[u8; 3]; 3], turn_as_int: u8) -> u8 {
+    // Horizontal & Vertical
     for y in 0..3 {
-        if board[y][last_move.x] != turn_as_int { break; }
-        if y == 2 {
-            return true;
+        for x in 0..3 {
+            if board[y][x] != turn_as_int { break; }
+            if x == 2 {
+                return turn_as_int;
+            }
+
+            if y == 2 {
+                return turn_as_int;
+            }
         }
     }
     // Diagonal left to right
-    if last_move.y == last_move.x {
-        for i in 0..3 {
-            if board[i][i] != turn_as_int { break; }
-            if i == 2 {
-                return true;
-            }
+    for i in 0..3 {
+        if board[i][i] != turn_as_int { break; }
+        if i == 2 {
+            return turn_as_int;
         }
     }
     // Diagonal right to left
-    if last_move.y + last_move.x == 2 {
-        for i in 0..3 {
-            if board[i][2 - i] != turn_as_int { break; }
-            if i == 2 {
-                return true;
-            }
+    for i in 0..3 {
+        if board[i][2 - i] != turn_as_int { break; }
+        if i == 2 {
+            return turn_as_int;
         }
     }
 
-    false
+    0 // Return 0 if no winners
 }
 
 fn print_board(board: &[[u8; 3]; 3]) {
