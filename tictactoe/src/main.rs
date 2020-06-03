@@ -113,13 +113,8 @@ fn minimax(mut board: [[Square; 3]; 3], maximizer: bool, mut alpha: isize, mut b
                     best = cmp::max(best, minimax(board, false, alpha, beta));
                     board[y][x] = Square::None;
 
-                    if best > alpha {
-                        alpha = best;
-                    }
-
-                    if alpha > beta {
-                        break;
-                    }
+                    alpha = cmp::max(best, alpha);
+                    if alpha > beta { break; }
                 }
             }
         }
@@ -131,16 +126,10 @@ fn minimax(mut board: [[Square; 3]; 3], maximizer: bool, mut alpha: isize, mut b
                 if board[y][x] == Square::None {
                     board[y][x] = Square::X;
                     best = cmp::min(best, minimax(board, true, alpha, beta));
-                    // println!("best: {}, iter: {}", best, iter);
                     board[y][x] = Square::None;
 
-                    if best < beta {
-                        beta = best;
-                    }
-
-                    if alpha > beta {
-                        break;
-                    }
+                    beta = cmp::min(best, beta);
+                    if alpha > beta { break; }
                 }
             }
         }
