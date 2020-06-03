@@ -3,8 +3,6 @@ use std::io::Write;
 use std::process::exit;
 use std::cmp;
 
-
-
 #[derive(PartialEq, Eq, Copy, Clone)] // Allows square to be evaluated with ==
 enum Square {
     X,
@@ -23,8 +21,8 @@ impl Square {
 }
 
 struct Coordinate {
-    x: usize,
     y: usize,
+    x: usize,
 }
 
 fn main() {
@@ -60,11 +58,13 @@ fn main() {
         let win = check_for_win(&board);
         if win != Square::None {
             print_board(&board);
-            println!("{} wins!", turn.get_char());
+            println!("{} wins!", win.get_char());
             if play_again() { board = [[Square::None; 3]; 3]; }
         }
 
         if check_for_draw(&board) {
+            print_board(&board);
+            println!("DRAW!");
             if play_again() { board = [[Square::None; 3]; 3]; }
         }
 
@@ -75,19 +75,33 @@ fn main() {
         };
 
         if bot_playing {
-            println!("Bots turn!");
+            let bot_move = find_best_move(board);
+            board[bot_move.y][bot_move.x] = Square::O;
+            println!("Minimax chose {}, {}!", bot_move.x + 1, bot_move.y + 1);
+
+            turn = match turn {
+                Square::X => Square::O,
+                Square::O => Square::X,
+                _ => panic!("Error!")
+            };
+
+            let win = check_for_win(&board);
+            if win != Square::None {
+                print_board(&board);
+                println!("{} wins!", win.get_char());
+                if play_again() { board = [[Square::None; 3]; 3]; }
+            }
         }
     }
 }
 
-fn minimax(board: &mut [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize {
+fn minimax(mut board: [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize {
     let score = match check_for_win(&board) {
         Square::X => 1,
         Square::O => -1,
         Square::None => 0,
     };
 
-    // Return score if maximizer or minimzer won
     if score == 1 || score == -1 { return score; }
     if check_for_draw(&board) { return 0; }
 
@@ -118,6 +132,27 @@ fn minimax(board: &mut [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize
         }
         return best;
     }
+}
+
+fn find_best_move(mut board: [[Square; 3]; 3]) -> Coordinate {
+    let mut best_score = -100;
+    let mut move_coords = Coordinate {x: 0, y: 0 };
+
+    for y in 0..3 {
+        for x in 0..3 {
+            if board[y][x] == Square::None {
+                board[y][x] = Square::O;
+                let new_score = minimax(board, 0, false);
+                board[y][x] = Square::None;
+
+                if new_score > best_score {
+                    move_coords = Coordinate { y: y, x: x };
+                    best_score = new_score;
+                }
+            }
+        }
+    }
+    move_coords
 }
 
 fn check_for_win(board: &[[Square; 3]; 3]) -> Square {
@@ -167,7 +202,6 @@ fn check_for_draw(board: &[[Square; 3]; 3]) -> bool {
     for i in 0..3 {
         if board[i].contains(&Square::None) { break; }
         if i == 2 {
-            println!("DRAW!!!!!!!");
             return true;
         }
     }
