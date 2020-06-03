@@ -16,14 +16,14 @@ fn main() {
 
     let play_bot_input = console_input("Play against bot? Y/N: ");
     let play_bot_input = play_bot_input.trim();
-    let mut bot_playing = true;
-    if play_bot_input == "Y" {
-        bot_playing = true;
-    } else if play_bot_input == "N" {
-        bot_playing = false;
-    } else {
-        println!("Invalid input, defaulting to bot.")
-    }
+    let bot_playing: bool = match play_bot_input {
+        "Y" => true,
+        "N" => false,
+        _ => {
+            println!("Invalid input, defaulting to bot.");
+            false
+        }
+    };
 
     loop {
         print_board(&board);
@@ -48,22 +48,14 @@ fn main() {
                 }
             }
 
-            let mut x = 0;
             for i in 0..3 {
-                if board[i].contains(&0) {
-                    continue;
-                } else {
-                    x += 1;
-                }
+                if board[i].contains(&0) { break; }
 
-                if x == 3 {
+                if i == 2 {
                     println!("DRAW!!!!!!!");
-                    if play_again() {
-                        board = [[0u8; 3]; 3];
-                    }
+                    if play_again() { board = [[0u8; 3]; 3]; }
                 }
             }
-            println!("Rows filled: {}", x);
         } else {
             println!("\nPosition occupied!");
             continue;
@@ -82,12 +74,10 @@ fn play_again() -> bool {
         let input = console_input("Play again? Y/N: ");
 
         let input = input.trim();
-        if input == "Y" {
-            return true;
-        } else if input == "N" {
-            exit(0);
-        } else {
-            continue;
+        match input {
+            "Y" => return true,
+            "N" => exit(0),
+            _ => continue
         }
     }
 }
