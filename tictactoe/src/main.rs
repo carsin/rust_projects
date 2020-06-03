@@ -14,13 +14,25 @@ fn main() {
     let mut turn_as_char;
     let mut turn_as_int;
 
+    let play_bot_input = console_input("Play against bot? Y/N: ");
+    let play_bot_input = play_bot_input.trim();
+    let mut bot_playing = true;
+    if play_bot_input == "Y" {
+        bot_playing = true;
+    } else if play_bot_input == "N" {
+        bot_playing = false;
+    } else {
+        println!("Invalid input, defaulting to bot.")
+    }
+
     loop {
         print_board(&board);
-        turn_as_int = turn as u8 + 1;
         match turn {
             false => turn_as_char = "X",
             true => turn_as_char = "Y",
         };
+
+        turn_as_int = turn as u8 + 1;
 
         println!("\n{}'s turn.", turn_as_char);
         let last_play_coords = get_player_input();
@@ -33,10 +45,7 @@ fn main() {
                 println!("{} wins!", turn_as_char);
 
                 'ask_loop: loop {
-                    let mut input = String::new();
-                    print!("Play again? Y/N: ");
-                    io::stdout().flush().unwrap();
-                    io::stdin().read_line(&mut input).expect("Failed to read line");
+                    let input = console_input("Play again? Y/N: ");
 
                     let input = input.trim();
                     if input == "Y" {
@@ -47,7 +56,11 @@ fn main() {
                     }
                 }
             }
-            turn = !turn;
+            if bot_playing {
+                println!("bots turn!");
+            } else {
+                turn = !turn;
+            }
         } else {
             println!("That space is already occupied!");
         }
@@ -59,9 +72,7 @@ fn get_player_input() -> Coordinate {
     let mut x: usize = 0;
 
     while x_input == String::new() {
-        print!("X: ");
-        io::stdout().flush().unwrap();
-        io::stdin().read_line(&mut x_input).expect("Failed");
+        x_input = console_input("X: ");
 
         if x_input.trim().parse::<usize>().is_ok() {
             x = x_input.trim().parse::<usize>().unwrap();
@@ -78,9 +89,7 @@ fn get_player_input() -> Coordinate {
     let mut y_input: String = String::new();
     let mut y: usize = 0;
     while y_input == String::new() {
-        print!("Y: ");
-        io::stdout().flush().unwrap();
-        io::stdin().read_line(&mut y_input).expect("Failed");
+        y_input = console_input("Y: ");
 
         if y_input.trim().parse::<usize>().is_ok() {
             y = y_input.trim().parse::<usize>().unwrap();
@@ -153,4 +162,13 @@ fn print_board(board: &[[u8; 3]; 3]) {
     print!("  └───┴───┴───┘\n");
 
     io::stdout().flush().unwrap();
+}
+
+fn console_input(msg: &str) -> String {
+    let mut input = String::new();
+    print!("{}", msg);
+    io::stdout().flush().unwrap();
+    io::stdin().read_line(&mut input).expect("Failed to read line");
+
+    input
 }
