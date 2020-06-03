@@ -95,18 +95,14 @@ fn main() {
     }
 }
 
-fn minimax(mut board: [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize {
+fn minimax(mut board: [[Square; 3]; 3], maximizer: bool, mut alpha: isize, mut beta: isize) -> isize {
     let score = match check_for_win(&board) {
-        Square::X => 10 - depth,
-        Square::O => -10 + depth,
+        Square::X => 10,
+        Square::O => -10,
         Square::None => 0,
     };
 
-    if score == 10 || score == -10 { return score; }
-
-    if check_for_draw(&board) {
-        return 0;
-    }
+    if score == 10 || score == -10 || check_for_draw(&board) { return score; }
 
     if maximizer {
         let mut best = -1000;
@@ -114,25 +110,41 @@ fn minimax(mut board: [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize 
             for x in 0..3 {
                 if board[y][x] == Square::None {
                     board[y][x] = Square::O;
-                    let iter = minimax(board, depth + 1, !maximizer);
-                    best = cmp::max(best, iter);
+                    best = cmp::max(best, minimax(board, false, alpha, beta));
                     board[y][x] = Square::None;
+
+                    if best > alpha {
+                        alpha = best;
+                    }
+
+                    if alpha > beta {
+                        break;
+                    }
                 }
             }
         }
-        return best;
+        alpha
     } else {
         let mut best = 1000;
         for y in 0..3 {
             for x in 0..3 {
                 if board[y][x] == Square::None {
                     board[y][x] = Square::X;
-                    best = cmp::min(best, minimax(board, depth + 1, !maximizer));
+                    best = cmp::min(best, minimax(board, true, alpha, beta));
+                    // println!("best: {}, iter: {}", best, iter);
                     board[y][x] = Square::None;
+
+                    if best < beta {
+                        beta = best;
+                    }
+
+                    if alpha > beta {
+                        break;
+                    }
                 }
             }
         }
-        return best;
+        beta
     }
 }
 
@@ -144,7 +156,7 @@ fn find_best_move(mut board: [[Square; 3]; 3]) -> Coordinate {
         for x in 0..3 {
             if board[y][x] == Square::None {
                 board[y][x] = Square::O;
-                let new_score = minimax(board, 0, false);
+                let new_score = minimax(board, true, -1000, 1000);
                 board[y][x] = Square::None;
 
                 if new_score > best_score {
