@@ -3,16 +3,31 @@ use std::io::Write;
 
 use std::process::exit;
 
+#[derive(PartialEq, Eq, Copy, Clone)] // Allows square to be evaluated with ==
+enum Square {
+    X,
+    O,
+    None,
+}
+
+impl Square {
+    fn get_char(&self) -> char {
+        match self {
+            Square::X => return 'X',
+            Square::O => return 'O',
+            Square::None => return '_'
+        }
+    }
+}
+
 struct Coordinate {
     x: usize,
     y: usize,
 }
 
 fn main() {
-    let mut board = [[0u8; 3]; 3];
-    let mut turn = false;
-    let mut turn_as_char;
-    let mut turn_as_int;
+    let mut board = [[Square::None; 3]; 3];
+    let mut turn = Square::X;
 
     let play_bot_input = console_input("Play against bot? y/n: ");
     let play_bot_input = play_bot_input.trim();
@@ -27,36 +42,30 @@ fn main() {
 
     loop {
         print_board(&board);
-        match turn {
-            false => turn_as_char = "X",
-            true => turn_as_char = "O",
-        };
 
-        turn_as_int = turn as u8 + 1;
-
-        println!("\n{}'s turn.", turn_as_char);
+        println!("\n{}'s turn.", turn.get_char());
         let last_play_coords = get_player_input();
 
         // Check if position is empty
-        if board[last_play_coords.y][last_play_coords.x] == 0 {
-            board[last_play_coords.y][last_play_coords.x] = turn_as_int;
-            let win = check_for_win(&board, turn_as_int);
-            if win > 0 {
-                print_board(&board);
-                println!("{} wins!", turn_as_char);
-                if play_again() { board = [[0u8; 3]; 3]; }
-            }
-
-            if check_for_draw(board) {
-                if play_again() { board = [[0u8; 3]; 3]; }
-            }
-
+        if board[last_play_coords.y][last_play_coords.x] == Square::None {
+            board[last_play_coords.y][last_play_coords.x] = turn;
         } else {
             println!("\nPosition occupied!");
             continue;
         }
 
-        turn = !turn;
+        // Check if game is over
+        let win = check_for_win(&board);
+        if win != Square::None {
+            print_board(&board);
+            println!("{} wins!", turn.get_char());
+            if play_again() { board = [[Square::None; 3]; 3]; }
+        }
+
+        if check_for_draw(board) {
+            if play_again() { board = [[Square::None; 3]; 3]; }
+        }
+
 
         if bot_playing {
             println!("Bots turn!");
@@ -64,25 +73,65 @@ fn main() {
     }
 }
 
-fn minimax(board: &[[u8; 3]; 3], depth: isize) -> isize {
-    let score = check_for_win(&board, 2) as isize;
-    if score == 2 { return score };
+fn minimax(board: &[[Square; 3]; 3], depth: isize) -> isize {
 
     0
 }
 
-fn check_for_draw(board: [[u8; 3]; 3]) -> bool {
+fn check_for_win(board: &[[Square; 3]; 3]) -> Square {
+    // Horizontal
+    for y in 0..3 {
+        if board[y][0] == board[y][1] && board[y][1] == board[y][2] && board[y][0] != Square::None {
+            return board[y][0];
+        }
+    }
+
+    // Vertical
+    for x in 0..3 {
+        if board[0][x] == board[1][x] && board[1][x] == board[2][x] && board[0][x] != Square::None {
+            return board[0][x];
+        }
+    }
+
+    // Diagonal left to right
+    if board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[0][0] != Square::None {
+        return board[0][0];
+    }
+
+    // Diagonal right to left
+    if board[2][0] == board[1][1] && board[1][1] == board[0][2] && board[2][0] != Square::None {
+        return board[2][0];
+    }
+
+    Square::None // Return Square::None if no winners
+}
+
+fn print_board(board: &[[Square; 3]; 3]) {
+    print!("\n    1   2   3  \n");
+    print!("  ┌───┬───┬───┐\n");
+    for y in 0..3 {
+        print!("{} │ ", y + 1);
+        for x in 0..3 {
+            print!("{} │ ", board[y][x].get_char());
+        }
+        print!("\n");
+    }
+    print!("  └───┴───┴───┘\n");
+
+    io::stdout().flush().unwrap();
+}
+
+fn check_for_draw(board: [[Square; 3]; 3]) -> bool {
     for i in 0..3 {
-        if board[i].contains(&0) { break; }
+        if board[i].contains(&Square::None) { break; }
         if i == 2 {
-            return true;
             println!("DRAW!!!!!!!");
+            return true;
         }
     }
 
     false
 }
-
 
 fn play_again() -> bool {
     loop {
@@ -134,59 +183,6 @@ fn get_player_input() -> Coordinate {
     }
 
     Coordinate { y: y - 1, x: x - 1 }
-}
-
-fn check_for_win(board: &[[u8; 3]; 3], turn_as_int: u8) -> u8 {
-    // Horizontal & Vertical
-    for y in 0..3 {
-        for x in 0..3 {
-            if board[y][x] != turn_as_int { break; }
-            if x == 2 {
-                return turn_as_int;
-            }
-
-            if y == 2 {
-                return turn_as_int;
-            }
-        }
-    }
-    // Diagonal left to right
-    for i in 0..3 {
-        if board[i][i] != turn_as_int { break; }
-        if i == 2 {
-            return turn_as_int;
-        }
-    }
-    // Diagonal right to left
-    for i in 0..3 {
-        if board[i][2 - i] != turn_as_int { break; }
-        if i == 2 {
-            return turn_as_int;
-        }
-    }
-
-    0 // Return 0 if no winners
-}
-
-fn print_board(board: &[[u8; 3]; 3]) {
-    print!("\n    1   2   3  \n");
-    print!("  ┌───┬───┬───┐\n");
-    for y in 0..3 {
-        print!("{} │ ", y + 1);
-        for x in 0..3 {
-            match board[y][x] {
-                0 => print!("."),
-                1 => print!("X"),
-                2 => print!("O"),
-                _ => print!("Error!"),
-            }
-            print!(" │ ");
-        }
-        print!("\n");
-    }
-    print!("  └───┴───┴───┘\n");
-
-    io::stdout().flush().unwrap();
 }
 
 fn console_input(msg: &str) -> String {
