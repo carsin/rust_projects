@@ -97,22 +97,25 @@ fn main() {
 
 fn minimax(mut board: [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize {
     let score = match check_for_win(&board) {
-        Square::X => 1,
-        Square::O => -1,
+        Square::X => 10 - depth,
+        Square::O => -10 + depth,
         Square::None => 0,
     };
 
-    if score == 1 || score == -1 { return score; }
-    if check_for_draw(&board) { return 0; }
+    if score == 10 || score == -10 { return score; }
+
+    if check_for_draw(&board) {
+        return 0;
+    }
 
     if maximizer {
         let mut best = -1000;
-
         for y in 0..3 {
             for x in 0..3 {
                 if board[y][x] == Square::None {
                     board[y][x] = Square::O;
-                    best = cmp::max(best, minimax(board, depth + 1, !maximizer));
+                    let iter = minimax(board, depth + 1, !maximizer);
+                    best = cmp::max(best, iter);
                     board[y][x] = Square::None;
                 }
             }
@@ -120,7 +123,6 @@ fn minimax(mut board: [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize 
         return best;
     } else {
         let mut best = 1000;
-
         for y in 0..3 {
             for x in 0..3 {
                 if board[y][x] == Square::None {
@@ -199,14 +201,14 @@ fn print_board(board: &[[Square; 3]; 3]) {
 }
 
 fn check_for_draw(board: &[[Square; 3]; 3]) -> bool {
-    for i in 0..3 {
-        if board[i].contains(&Square::None) { break; }
-        if i == 2 {
-            return true;
+    for y in 0..3 {
+        for x in 0..3 {
+            if board[y][x] == Square::None {
+                return false;
+            }
         }
     }
-
-    false
+    true
 }
 
 fn play_again() -> bool {
