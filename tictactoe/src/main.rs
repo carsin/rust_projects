@@ -106,7 +106,7 @@ fn minimax(mut board: [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize 
     if check_for_draw(&board) { return 0; }
 
     if maximizer {
-        let mut best = -100;
+        let mut best = -1000;
 
         for y in 0..3 {
             for x in 0..3 {
@@ -119,13 +119,13 @@ fn minimax(mut board: [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize 
         }
         return best;
     } else {
-        let mut best = 100;
+        let mut best = 1000;
 
         for y in 0..3 {
             for x in 0..3 {
                 if board[y][x] == Square::None {
                     board[y][x] = Square::X;
-                    best = cmp::max(best, minimax(board, depth + 1, !maximizer));
+                    best = cmp::min(best, minimax(board, depth + 1, !maximizer));
                     board[y][x] = Square::None;
                 }
             }
@@ -135,7 +135,7 @@ fn minimax(mut board: [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize 
 }
 
 fn find_best_move(mut board: [[Square; 3]; 3]) -> Coordinate {
-    let mut best_score = -100;
+    let mut best_score = -1000;
     let mut move_coords = Coordinate {x: 0, y: 0 };
 
     for y in 0..3 {
