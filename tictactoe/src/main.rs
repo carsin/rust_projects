@@ -2,6 +2,8 @@ use std::io;
 use std::io::Write;
 use std::process::exit;
 use std::cmp;
+use std::f64;
+pub const INFINITY: isize = f64::INFINITY as isize;
 
 #[derive(PartialEq, Eq, Copy, Clone)] // Allows square to be evaluated with ==
 enum Square {
@@ -62,6 +64,7 @@ fn main() {
             if play_again() { board = [[Square::None; 3]; 3]; }
         }
 
+        // Check for draw
         if check_for_draw(&board) {
             print_board(&board);
             println!("DRAW!");
@@ -95,62 +98,63 @@ fn main() {
     }
 }
 
-fn minimax(mut board: [[Square; 3]; 3], maximizer: bool, mut alpha: isize, mut beta: isize) -> isize {
-    let score = match check_for_win(&board) {
-        Square::X => 10,
-        Square::O => -10,
-        Square::None => 0,
+fn minimax(board: [[Square; 3]; 3], depth: isize, maximizer: bool) -> isize{
+    let winner = check_for_win(&board);
+    match winner {
+        Square::X => return -10 + depth,
+        Square::O => return 10 - depth,
+        _ => (),
     };
 
-    if score == 10 || score == -10 || check_for_draw(&board) { return score; }
+    if check_for_draw(&board) {
+        return 0;
+    }
 
     if maximizer {
-        let mut best = -1000;
+        let mut score = -INFINITY;
+        // Loop through all available positons
         for y in 0..3 {
             for x in 0..3 {
                 if board[y][x] == Square::None {
-                    board[y][x] = Square::O;
-                    best = cmp::max(best, minimax(board, false, alpha, beta));
-                    board[y][x] = Square::None;
-
-                    alpha = cmp::max(best, alpha);
-                    if alpha > beta { break; }
+                    let mut board_copy = board;
+                    board_copy[y][x] = Square::O;
+                    let new_score = minimax(board_copy, depth + 1, !maximizer);
+                    score = cmp::max(score, new_score);
                 }
             }
         }
-        alpha
+        return score;
     } else {
-        let mut best = 1000;
+        let mut score = INFINITY;
         for y in 0..3 {
             for x in 0..3 {
                 if board[y][x] == Square::None {
-                    board[y][x] = Square::X;
-                    best = cmp::min(best, minimax(board, true, alpha, beta));
-                    board[y][x] = Square::None;
-
-                    beta = cmp::min(best, beta);
-                    if alpha > beta { break; }
+                    let mut board_copy = board;
+                    board_copy[y][x] = Square::X;
+                    let new_score = minimax(board_copy, depth + 1, !maximizer);
+                    score = cmp::min(score, new_score)
                 }
             }
         }
-        beta
+        return score;
     }
 }
 
-fn find_best_move(mut board: [[Square; 3]; 3]) -> Coordinate {
-    let mut best_score = -1000;
-    let mut move_coords = Coordinate {x: 0, y: 0 };
+fn find_best_move(board: [[Square; 3]; 3]) -> Coordinate {
+    let mut best_score = -INFINITY;
+    let mut move_coords = Coordinate {y: 0, x: 0 };
 
     for y in 0..3 {
         for x in 0..3 {
             if board[y][x] == Square::None {
-                board[y][x] = Square::O;
-                let new_score = minimax(board, true, -1000, 1000);
-                board[y][x] = Square::None;
+                let mut board_copy = board;
+                board_copy[y][x] = Square::O;
+                let new_score = minimax(board_copy, 0, true);
 
                 if new_score > best_score {
-                    move_coords = Coordinate { y: y, x: x };
                     best_score = new_score;
+                    move_coords.y = y;
+                    move_coords.x = y;
                 }
             }
         }
@@ -190,7 +194,7 @@ fn print_board(board: &[[Square; 3]; 3]) {
     print!("\n    1   2   3  \n");
     print!("  ┌───┬───┬───┐\n");
     for y in 0..3 {
-        print!("{} │ ", y + 1);
+        print!("{} | ", y + 1);
         for x in 0..3 {
             print!("{} │ ", board[y][x].get_char());
         }
@@ -201,10 +205,10 @@ fn print_board(board: &[[Square; 3]; 3]) {
     io::stdout().flush().unwrap();
 }
 
-fn check_for_draw(board: &[[Square; 3]; 3]) -> bool {
+fn check_for_draw(&board: &[[Square; 3]; 3]) -> bool {
     for y in 0..3 {
         for x in 0..3 {
-            if board[y][x] == Square::None {
+            if &board[y][x] == &Square::None {
                 return false;
             }
         }
